@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KSA Missed Opportunity Tracker | متابعة فرص البيع الضائعة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2B2B2B;--gold:#A8863F;--gold-soft:#E9DFC8;--paper:#F5F2EC;--card:#fff;--line:#DCD5C6;--muted:#6B665C;--alert:#9E3B2E;
+  --head:Cambria,"Noto Sans Arabic",Georgia,serif;--body:Calibri,"Noto Sans Arabic","Segoe UI",Tahoma,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.hidden{display:none !important}
+.wrap{max-width:520px;margin:0 auto}
+header{background:var(--ink);color:var(--paper);border-bottom:4px solid var(--gold);position:sticky;top:0;z-index:5}
+.hd{padding:10px 14px 0}
+.hd small{font-family:var(--head);letter-spacing:.12em;color:var(--gold-soft);font-size:12px}
+.bi{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.hd h1{font-family:var(--head);font-size:19px;margin:0}
+.tabs{display:flex;gap:4px;padding:8px 10px 0}
+.tabs button{flex:1;background:none;border:0;color:#cfc9bc;padding:9px 6px;border-radius:8px 8px 0 0;cursor:pointer;font-size:15px}
+.tabs button[aria-selected=true]{background:var(--paper);color:var(--ink);font-weight:600}
+main{padding:12px 12px 90px}
+.notice{background:#fff7e0;border:1px solid #e3c877;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:14px}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+.lb{display:flex;justify-content:space-between;gap:10px;font-weight:600;font-size:15px;margin:0 0 7px}
+.lb + .lb,.gap{margin-top:12px}
+.lb i{font-style:normal;color:var(--alert)}
+.opt{font-weight:400;color:var(--muted);font-size:13px}
+select,input[type=text],input[type=tel],input[type=number],input[type=date],textarea{width:100%;padding:11px;border:1px solid #bdb5a3;border-radius:8px;background:#fff;font-size:16px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px solid #bdb5a3;background:#fff;border-radius:20px;padding:8px 13px;cursor:pointer;font-size:15px;display:inline-flex;gap:6px;align-items:center;min-height:40px}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip .sw{width:14px;height:14px;border-radius:50%;border:1px solid #999;flex:none}
+.chips.big .chip{flex:1;justify-content:center;font-weight:600;padding:12px}
+.chips.col2{display:grid;grid-template-columns:1fr 1fr}
+.chips.col2 .chip{border-radius:8px;flex-direction:column;align-items:flex-start;gap:0;line-height:1.3;font-size:14px}
+.chips.col2 .chip span{font-size:13px;opacity:.8;align-self:flex-end}
+.chips.sz .chip{min-width:46px;justify-content:center}
+.scan{display:flex;gap:8px;align-items:stretch}
+.scan label.cam{flex:none;background:var(--gold);color:#fff;border-radius:8px;padding:9px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;line-height:1.25;font-weight:600;min-width:104px;text-align:center}
+.scan label.cam b{font-size:22px;line-height:1}
+.scan input[type=text]{flex:1;font-size:18px;letter-spacing:.03em}
+.hint{font-size:13px;color:var(--muted);margin-top:6px}
+.hint.err{color:var(--alert);font-weight:600}
+.savebar{position:fixed;bottom:0;left:0;right:0;background:var(--paper);border-top:1px solid var(--line);padding:10px 12px}
+.savebar .wrap{display:flex;flex-direction:column;gap:4px}
+.btn{background:var(--ink);color:#fff;border:0;border-radius:10px;padding:14px;font-size:17px;font-weight:600;cursor:pointer;width:100%}
+.btn:disabled{opacity:.55}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--ink);padding:9px 12px;font-size:14px;font-weight:400;width:auto}
+.msg{font-size:13px;color:var(--alert);text-align:center}
+.toast{position:fixed;left:12px;right:12px;bottom:86px;margin:0 auto;max-width:480px;background:var(--ink);color:#fff;padding:12px 16px;border-radius:8px;border-left:5px solid var(--gold);z-index:9;text-align:center}
+.toast.err{border-left-color:var(--alert)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px}
+.kpi b{display:block;font-family:var(--head);font-size:24px;line-height:1.1}
+.kpi span{font-size:12.5px;color:var(--muted);display:block;margin-top:3px}
+.key{background:var(--ink);color:var(--paper);border-radius:10px;padding:13px 14px;margin-bottom:10px}
+.key .lb{color:var(--gold-soft)}
+.key p{margin:7px 0 0;font-size:14.5px}
+.key p span{display:block;direction:rtl;text-align:right;opacity:.85}
+.row{padding:5px 0}
+.row .lab{display:flex;justify-content:space-between;gap:8px;font-size:13.5px}
+.row .lab span:last-child{color:var(--muted)}
+.barline{display:flex;align-items:center;gap:8px}
+.bar{flex:1;height:11px;background:#efe9dc;border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold)}
+.num{font-size:13.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.num small{color:var(--muted)}
+.trend{display:flex;align-items:flex-end;gap:2px;height:110px;border-bottom:1px solid var(--line)}
+.trend div{flex:1;background:var(--gold);border-radius:2px 2px 0 0;min-height:2px}
+.trend div.z{background:#e6dfd0}
+.ax{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:3px}
+.empty{color:var(--muted);font-size:14px}
+.rec{border-top:1px solid var(--line);padding:8px 0;font-size:14px}
+.rec b{font-weight:600}
+.rec small{color:var(--muted);display:block}
+.gate{text-align:center;padding:30px 10px}
+.gate input{text-align:center;font-size:20px;margin:12px 0}
+.credit{text-align:center;color:var(--muted);font-size:13px;margin-top:16px}
+.h2{font-family:var(--head);font-size:17px;display:flex;justify-content:space-between;border-bottom:2px solid var(--gold);padding:10px 2px 4px;margin:6px 0 10px}
+.kpi em{display:block;font-style:normal;font-size:12px;color:var(--muted);margin-top:3px}
+.sub{font-size:13px;color:var(--muted);margin:-3px 0 8px}
+.item{border-top:1px solid var(--line);padding:8px 0;font-size:14px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.item:first-of-type{border-top:0}
+.item small{display:block;color:var(--muted)}
+.item .big{font-family:var(--head);font-size:20px;white-space:nowrap}
+.item a{background:var(--ink);color:#fff;text-decoration:none;border-radius:8px;padding:8px 12px;white-space:nowrap;font-size:14px}
+.quiet{display:flex;flex-wrap:wrap;gap:6px}
+.quiet span{border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:13px;background:#faf8f3}
+[lang=ar]{direction:rtl}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="hd"><small>CHARLES &amp; KEITH | PEDRO | KSA</small>
+    <div class="bi"><h1>Missed opportunity</h1><h1 lang="ar">فرصة بيع ضائعة</h1></div></div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tabRec" aria-selected="true">Record | تسجيل</button>
+    <button role="tab" id="tabDash" aria-selected="false">Dashboard | التحليل</button>
+  </nav>
+</div></header>
+
+<main class="wrap">
+<div id="notConnected" class="notice hidden">Test mode: not connected to Google Sheet yet. Records stay on this device.<br><span lang="ar">وضع التجربة: لم يتم الربط مع Google Sheet. السجلات محفوظة على هذا الجهاز فقط.</span></div>
+
+<!-- ================= RECORD ================= -->
+<section id="viewRec">
+  <div class="sec">
+    <div class="lb"><span>Brand <i>*</i></span><span lang="ar">العلامة التجارية</span></div>
+    <div class="chips big" id="gBrand"></div>
+    <div class="lb gap"><span>Area</span><span lang="ar">المنطقة</span></div>
+    <select id="area"></select>
+    <div class="lb gap"><span>Store <i>*</i></span><span lang="ar">الفرع</span></div>
+    <select id="store"></select>
+    <div class="two gap">
+      <div><div class="lb"><span>Date <i>*</i></span><span lang="ar">التاريخ</span></div><input type="date" id="date"></div>
+      <div><div class="lb"><span>Staff <i>*</i></span><span lang="ar">الموظف</span></div><input type="text" id="staff" list="staffList" autocomplete="off"><datalist id="staffList"></datalist></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="lb"><span>Style number</span><span lang="ar">رقم الموديل</span></div>
+    <div class="scan">
+      <label class="cam"><b>📷</b>Photo of box<span lang="ar">صوّر العلبة</span>
+        <input type="file" id="boxPhoto" accept="image/*" capture="environment" class="hidden"></label>
+      <input type="text" id="style" dir="ltr" placeholder="CK1-60280432" autocomplete="off" autocapitalize="characters">
+    </div>
+    <div class="hint" id="scanMsg">Take a photo of the box label. The style number fills in. Check it. <span lang="ar">صوّر ملصق العلبة ليُكتب رقم الموديل تلقائياً، ثم تأكد منه.</span></div>
+
+    <div class="lb gap"><span>Category <i>*</i></span><span lang="ar">الفئة</span></div>
+    <div class="chips" id="gCat"></div>
+    <div id="sizeBox" class="hidden"><div class="lb gap"><span>Size</span><span lang="ar">المقاس</span></div><div class="chips sz" id="gSize"></div>
+      <input type="text" id="sizeText" class="hidden gap" placeholder="Size | المقاس"></div>
+    <div class="lb gap"><span>Colour</span><span lang="ar">اللون</span></div>
+    <div class="two">
+      <input type="text" id="colourEn" list="colEnList" placeholder="Black" autocomplete="off"><datalist id="colEnList"></datalist>
+      <input type="text" id="colourAr" list="colArList" placeholder="أسود" lang="ar" dir="rtl" autocomplete="off"><datalist id="colArList"></datalist>
+    </div>
+    <div class="hint">Write in English or Arabic. The other language fills in. <span lang="ar">اكتب بالعربية أو الإنجليزية وستُكتب اللغة الأخرى تلقائياً.</span></div>
+    <div class="two gap">
+      <div><div class="lb"><span>Price SAR</span><span lang="ar">السعر</span></div><input type="number" id="price" inputmode="decimal" min="0" step="0.01" dir="ltr"></div>
+      <div><div class="lb"><span>Barcode <span class="opt">optional</span></span><span lang="ar">الباركود</span></div><input type="text" id="barcode" inputmode="numeric" dir="ltr" autocomplete="off"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="lb"><span>Reason <i>*</i> <span class="opt">choose 1 or 2</span></span><span lang="ar">سبب ضياع البيع <span class="opt">اختر سبباً أو سببين</span></span></div>
+    <div class="chips col2" id="gReason"></div>
+  </div>
+
+  <div class="sec">
+    <div class="lb"><span>Customer <span class="opt">optional</span></span><span lang="ar">العميل <span class="opt">اختياري</span></span></div>
+    <div class="two"><input type="text" id="customer" placeholder="Name | الاسم" autocomplete="off"><input type="tel" id="phone" dir="ltr" placeholder="05XXXXXXXX" autocomplete="off"></div>
+    <div class="lb gap"><span>Remark</span><span lang="ar">ملاحظة</span></div>
+    <div class="chips" id="gRemark"></div>
+    <textarea id="remark" class="gap" rows="2" placeholder="Type a remark | اكتب ملاحظة"></textarea>
+  </div>
+</section>
+
+<!-- ================= DASHBOARD ================= -->
+<section id="viewDash" class="hidden">
+  <div id="gate" class="sec gate hidden">
+    <div class="lb"><span>Dashboard PIN</span><span lang="ar">الرمز السري</span></div>
+    <input type="password" id="pin" inputmode="numeric" autocomplete="off" aria-label="PIN">
+    <button class="btn" id="pinBtn" type="button">Open dashboard | فتح اللوحة</button>
+  </div>
+  <div id="dash" class="hidden">
+    <div class="sec">
+      <div class="chips" id="fPeriod"></div>
+      <div class="chips gap" id="fBrand"></div>
+      <div class="two gap"><select id="fRegion" aria-label="Area"></select><select id="fStore" aria-label="Store"></select></div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="key"><div class="lb"><span>Key points</span><span lang="ar">أهم النقاط</span></div><div id="keyList"></div></div>
+    <div id="panels"></div>
+    <div class="h2"><span>All records</span><span lang="ar">جميع السجلات</span></div>
+    <div class="sec">
+      <div style="display:flex;gap:8px"><input type="text" id="search" placeholder="Search | بحث"><button class="btn ghost" id="csvBtn" type="button">CSV</button></div>
+      <div id="recs"></div>
+    </div>
+    <button class="btn ghost" id="refreshBtn" type="button" style="width:100%">Refresh | تحديث</button>
+  </div>
+</section>
+<div class="credit">Created by Nainsi Srivasatava</div>
+</main>
+
+<div class="savebar" id="savebar"><div class="wrap">
+  <div class="msg hidden" id="formMsg"></div>
+  <button class="btn" id="saveBtn" type="button">Save record | حفظ السجل</button>
+</div></div>
+
+<script>
+/* ================= SETTINGS ================= */
+// Paste your Apps Script web app URL between the quotes (it ends with /exec).
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzid2JXlDHrizFBKeJglfl0JPHoY0E6t8rmYTnkT1gL1P4nnCRU--6vzl8tq6gdYFdw/exec';
+const CUR = 'SAR';
+
+/* ================= LISTS (edit here) ================= */
+const BRANDS = [['Charles & Keith','تشارلز آند كيث'],['Pedro','بيدرو']];
+const REGIONS = [['Central','الوسطى'],['Eastern','الشرقية'],['Western','الغربية'],['Makkah','مكة المكرمة'],['North','الشمالية'],['South','الجنوبية']];
+let STORES = [ // brand, store, Arabic, area
+ ['Charles & Keith','Nakheel Mall - Riyadh','النخيل مول - الرياض','Central'],['Charles & Keith','Riyadh Park Mall - Riyadh','الرياض بارك - الرياض','Central'],
+ ['Charles & Keith','Galleria Mall - Riyadh','جاليريا مول - الرياض','Central'],['Charles & Keith','Hamra Mall - Riyadh','الحمراء مول - الرياض','Central'],
+ ['Charles & Keith','Panorama Mall - Riyadh','بانوراما مول - الرياض','Central'],['Charles & Keith','Granada Mall - Riyadh','غرناطة مول - الرياض','Central'],
+ ['Charles & Keith','Hayat Mall - Riyadh','حياة مول - الرياض','Central'],['Charles & Keith','Tala Mall - Riyadh','تالا مول - الرياض','Central'],
+ ['Charles & Keith','Park Avenue - Riyadh','بارك أفنيو - الرياض','Central'],['Charles & Keith','Kingdom Centre - Riyadh','مركز المملكة - الرياض','Central'],
+ ['Charles & Keith','Khaleej The View Mall - Riyadh','الخليج ذا فيو مول - الرياض','Central'],['Charles & Keith','Nakheel Plaza - Buraidah','النخيل بلازا - بريدة','North'],
+ ['Charles & Keith','Nakheel Mall - Dammam','النخيل مول - الدمام','Eastern'],['Charles & Keith','Mall of Dhahran - Khobar','مجمع الظهران - الخبر','Eastern'],
+ ['Charles & Keith','Jubail Mall - Jubail','الجبيل مول - الجبيل','Eastern'],['Charles & Keith','Red Sea Mall - Jeddah','رد سي مول - جدة','Western'],
+ ['Charles & Keith','Mall of Arabia - Jeddah','مول العرب - جدة','Western'],['Charles & Keith','Yasmin Mall - Jeddah','الياسمين مول - جدة','Western'],
+ ['Charles & Keith','Andalus Mall - Jeddah','الأندلس مول - جدة','Western'],['Charles & Keith','Jaddah Park - Jeddah','جدة بارك - جدة','Western'],
+ ['Charles & Keith','Al Salaam Mall - Jeddah','السلام مول - جدة','Western'],['Charles & Keith','Aziz Mall - Jeddah','عزيز مول - جدة','Western'],
+ ['Charles & Keith','Jouri Mall - Taif','جوري مول - الطائف','Western'],['Charles & Keith','Makkah Mall - Makkah','مكة مول - مكة المكرمة','Makkah'],
+ ['Charles & Keith','Abraj Al Bait - Makkah','أبراج البيت - مكة المكرمة','Makkah'],['Charles & Keith','Al Noor Mall - Madinah','النور مول - المدينة المنورة','Makkah'],
+ ['Charles & Keith','Rashid Mall - Abha','الراشد مول - أبها','South'],
+ ['Pedro','Nakheel Mall - Riyadh','النخيل مول - الرياض','Central'],['Pedro','Galleria Mall - Riyadh','جاليريا مول - الرياض','Central'],['Pedro','Riyadh Park Mall - Riyadh','الرياض بارك - الرياض','Central']
+];
+const W = ['34','35','36','37','38','39','40','41'], M = ['39','40','41','42','43','44','45','46'];
+const CATS = {
+ 'Charles & Keith':[
+  {v:'Shoes',ar:'أحذية',sizes:W,types:[['Heels','كعب عالي'],['Pumps','بامب'],['Flats','فلات'],['Ballerinas','باليرينا'],['Sandals','صنادل'],['Mules','ميول'],['Mary Janes','ماري جين'],['Loafers','لوفر'],['Sneakers','سنيكرز'],['Boots','بوت'],['Wedges','ويدج'],['Espadrilles','إسبادريل']]},
+  {v:'Bags',ar:'حقائب',types:[['Tote','توت'],['Shoulder','كتف'],['Crossbody','كروس'],['Top handle','يد'],['Backpack','ظهر'],['Clutch','كلتش'],['Bucket','باكيت'],['Mini','ميني']]},
+  {v:'Wallets',ar:'محافظ',types:[['Long wallet','محفظة طويلة'],['Short wallet','محفظة قصيرة'],['Cardholder','حافظة بطاقات'],['Pouch','بوتش']]},
+  {v:'Accessories',ar:'إكسسوارات',types:[['Sunglasses','نظارات شمسية'],['Jewellery','مجوهرات'],['Belt','حزام'],['Bag charm','ميدالية'],['Bag strap','حزام حقيبة'],['Phone case','غطاء جوال']]}],
+ 'Pedro':[
+  {v:"Men's shoes",ar:'أحذية رجالية',sizes:M,types:[['Loafers','لوفر'],['Sneakers','سنيكرز'],['Sandals','صنادل'],['Formal','رسمي'],['Boots','بوت']]},
+  {v:"Women's shoes",ar:'أحذية نسائية',sizes:W,types:[['Heels','كعب عالي'],['Flats','فلات'],['Sandals','صنادل'],['Loafers','لوفر'],['Sneakers','سنيكرز'],['Boots','بوت']]},
+  {v:'Bags',ar:'حقائب',types:[['Tote','توت'],['Shoulder','كتف'],['Crossbody','كروس'],['Backpack','ظهر'],['Clutch','كلتش']]},
+  {v:'Wallets',ar:'محافظ',types:[['Long wallet','محفظة طويلة'],['Short wallet','محفظة قصيرة'],['Cardholder','حافظة بطاقات']]},
+  {v:'Accessories',ar:'إكسسوارات',types:[['Belt','حزام'],['Sunglasses','نظارات شمسية'],['Jewellery','مجوهرات']]}]
+};
+const COLOURS = [['Black','أسود'],['White','أبيض'],['Beige','بيج'],['Cream','كريمي'],['Chalk','طباشيري'],['Nude','نود'],['Brown','بني'],['Taupe','رمادي بني'],
+ ['Tan','جملي'],['Camel','جملي'],['Cognac','كونياك'],['Red','أحمر'],['Burgundy','عنابي'],['Maroon','عنابي'],['Pink','وردي'],['Orange','برتقالي'],['Yellow','أصفر'],
+ ['Green','أخضر'],['Olive','زيتي'],['Mint','نعناعي'],['Blue','أزرق'],['Navy','كحلي'],['Purple','بنفسجي'],['Lilac','ليلكي'],['Grey','رمادي'],['Gray','رمادي'],
+ ['Silver','فضي'],['Gold','ذهبي'],['Rose gold','ذهبي وردي'],['Pewter','رصاصي'],['Bronze','برونزي'],['Multicolour','متعدد الألوان'],['Animal print','نقشة حيوان'],
+ ['Leopard','نقشة نمر'],['Denim','جينز'],['Clear','شفاف']];
+const SHADES = [['dark','غامق'],['light','فاتح']];
+const REASONS = [['Size not available','المقاس غير متوفر'],['Colour not available','اللون غير متوفر'],['Style out of stock','الموديل غير متوفر'],
+ ['Not carried in this store','غير موجود في هذا الفرع'],['Seen online or social media','شاهده أونلاين'],['New collection not arrived','التشكيلة الجديدة لم تصل'],
+ ['Matching item not available','القطعة المطابقة غير متوفرة'],['Price too high','السعر مرتفع'],['Waiting for sale or offer','ينتظر التخفيضات'],
+ ['Fit or comfort issue','غير مريح'],['Only display or damaged piece','قطعة عرض أو تالفة'],['Payment issue','مشكلة في الدفع'],['Will decide later','سيقرر لاحقاً'],['Other','أخرى']];
+const REMARKS = [['Call when in stock','اتصل عند التوفر'],['Checked other store','تم سؤال فرع آخر'],['Customer will come back','العميل سيعود']];
+const DAYS = [['Sunday','الأحد'],['Monday','الاثنين'],['Tuesday','الثلاثاء'],['Wednesday','الأربعاء'],['Thursday','الخميس'],['Friday','الجمعة'],['Saturday','السبت']];
+const AR = {}; // English value -> Arabic, for the dashboard
+[BRANDS,COLOURS,REASONS,DAYS,REGIONS].forEach(l=>l.forEach(x=>AR[x[0]]=x[1]));
+Object.values(CATS).forEach(l=>l.forEach(c=>{AR[c.v]=c.ar;c.types.forEach(t=>AR[t[0]]=t[1])}));
+function mapStores(){STORES.forEach(s=>AR[s[1]]=s[2])} mapStores();
+
+/* ================= HELPERS ================= */
+const $ = id => document.getElementById(id);
+const sel = {brand:'',cat:'',type:'',size:'',reasons:[]};
+const STOCK = ['Size not available','Colour not available','Style out of stock','Not carried in this store','New collection not arrived','Matching item not available','Only display or damaged piece'];
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function jget(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []}}
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => Math.round(n).toLocaleString('en-US');
+function iso(d){const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10)}
+function toast(m,err){const d=document.createElement('div');d.className='toast'+(err?' err':'');d.setAttribute('role','status');d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),3500)}
+async function api(body){const r=await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});return r.json()}
+
+// One-tap chip group. items: [value, arabic, swatch]
+function chips(id,items,key,onChange,opts){
+  opts=opts||{};const el=$(id);
+  el.innerHTML=items.map(x=>'<button type="button" class="chip" data-v="'+esc(x[0])+'" aria-pressed="'+(sel[key]===x[0])+'">'+
+    (x[2]?'<span class="sw" style="background:'+x[2]+'"></span>':'')+esc(x[0])+(x[1]?(opts.stack?'<span lang="ar">'+esc(x[1])+'</span>':' '+esc(x[1])):'')+'</button>').join('');
+  el.onclick=e=>{const b=e.target.closest('.chip');if(!b)return;
+    sel[key]=sel[key]===b.dataset.v&&!opts.keep?'':b.dataset.v;
+    el.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===sel[key]));
+    if(onChange)onChange()};
+}
+
+/* ================= FORM ================= */
+function drawArea(){
+  const have=REGIONS.filter(r=>STORES.some(s=>s[0]===sel.brand&&s[3]===r[0])),keep=lsGet('mo_area_'+sel.brand,'');
+  $('area').innerHTML='<option value="">All areas | كل المناطق</option>'+have.map(r=>'<option value="'+r[0]+'">'+r[0]+' | '+r[1]+'</option>').join('');
+  $('area').value=have.some(r=>r[0]===keep)?keep:'';
+}
+function drawStores(){
+  const ar=$('area').value,list=STORES.filter(s=>s[0]===sel.brand&&(!ar||s[3]===ar)),keep=lsGet('mo_store_'+sel.brand,'');
+  $('store').innerHTML='<option value="">Choose store | اختر الفرع</option>'+list.map(s=>'<option value="'+esc(s[1])+'">'+esc(s[1])+' | '+esc(s[2])+'</option>').join('');
+  $('store').value=list.some(s=>s[1]===keep)?keep:'';
+}
+function drawReasons(){
+  const el=$('gReason');
+  el.innerHTML=REASONS.map(x=>'<button type="button" class="chip" data-v="'+esc(x[0])+'" aria-pressed="'+sel.reasons.includes(x[0])+'">'+esc(x[0])+'<span lang="ar">'+esc(x[1])+'</span></button>').join('');
+  el.onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const v=b.dataset.v,i=sel.reasons.indexOf(v);
+    if(i>=0)sel.reasons.splice(i,1);else if(sel.reasons.length>=2){toast('2 reasons at most. Tap one to remove it. | سببان كحد أقصى',true);return}else sel.reasons.push(v);
+    el.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',sel.reasons.includes(c.dataset.v)))};
+}
+function drawCats(){
+  const list=CATS[sel.brand]||[];
+  if(!list.some(c=>c.v===sel.cat))sel.cat='';
+  chips('gCat',list.map(c=>[c.v,c.ar]),'cat',drawTypes,{keep:true});drawTypes();
+}
+function drawTypes(){
+  const c=(CATS[sel.brand]||[]).find(x=>x.v===sel.cat);
+  sel.type='';sel.size='';$('sizeText').value='';
+  $('sizeBox').classList.toggle('hidden',!c||!(c.sizes||c.sizeText));
+  if(!c)return;
+  $('gSize').classList.toggle('hidden',!c.sizes);$('sizeText').classList.toggle('hidden',!c.sizeText);
+  if(c.sizes)chips('gSize',c.sizes.map(s=>[s]),'size');
+}
+function setBrand(){lsSet('mo_brand',sel.brand);drawArea();drawStores();drawCats()}
+function drawStaffList(){$('staffList').innerHTML=jget('mo_staffs').map(s=>'<option value="'+esc(s)+'">').join('')}
+
+function initForm(){
+  sel.brand=lsGet('mo_brand','');
+  chips('gBrand',BRANDS,'brand',setBrand,{keep:true});
+  drawArea();drawStores();drawCats();
+  initColour();drawReasons();
+  $('area').onchange=()=>{lsSet('mo_area_'+sel.brand,$('area').value);drawStores()};
+  $('gRemark').innerHTML=REMARKS.map(r=>'<button type="button" class="chip" data-v="'+esc(r[0])+'">'+esc(r[0])+' '+esc(r[1])+'</button>').join('');
+  $('gRemark').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const t=$('remark');if(!t.value.includes(b.dataset.v))t.value=(t.value?t.value+'. ':'')+b.dataset.v};
+  $('date').value=iso(new Date());$('staff').value=lsGet('mo_staff','');drawStaffList();
+  $('store').onchange=()=>lsSet('mo_store_'+sel.brand,$('store').value);
+}
+
+/* ---- colour: write in one language, the other fills in ---- */
+const arKey = t => String(t).trim().replace(/[\u064B-\u0652\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/\s+/g,' ');
+const cap = t => t.charAt(0).toUpperCase()+t.slice(1);
+const C_EN = {}, C_AR = {};
+COLOURS.forEach(c=>{C_EN[c[0].toLowerCase()]=c[1];if(!C_AR[arKey(c[1])])C_AR[arKey(c[1])]=c[0]});
+function enToAr(t){
+  const k=t.trim().toLowerCase().replace(/\s+/g,' ');if(C_EN[k])return C_EN[k];
+  const w=k.split(' '),sh=SHADES.find(x=>x[0]===w[0]),base=C_EN[w.slice(1).join(' ')];
+  return sh&&base?base+' '+sh[1]:'';
+}
+function arToEn(t){
+  const k=arKey(t);if(C_AR[k])return C_AR[k];
+  const w=k.split(' '),sh=SHADES.find(x=>arKey(x[1])===w[w.length-1]),base=C_AR[w.slice(0,-1).join(' ')];
+  return sh&&base?cap(sh[0])+' '+base.toLowerCase():'';
+}
+function initColour(){
+  const seen={};
+  $('colEnList').innerHTML=COLOURS.map(c=>'<option value="'+esc(c[0])+'">').join('');
+  $('colArList').innerHTML=COLOURS.filter(c=>!seen[c[1]]&&(seen[c[1]]=1)).map(c=>'<option value="'+esc(c[1])+'">').join('');
+  const link=(from,to,fn)=>$(from).addEventListener('input',()=>{
+    const out=fn($(from).value),t=$(to);delete $(from).dataset.auto;
+    if(out){t.value=out;t.dataset.auto='1'}else if(t.dataset.auto||!$(from).value.trim()){t.value='';delete t.dataset.auto}
+  });
+  link('colourEn','colourAr',enToAr);link('colourAr','colourEn',arToEn);
+}
+function colourValue(){const en=$('colourEn').value.trim(),ar=$('colourAr').value.trim();if(en&&ar)AR[cap(en)]=ar;return en?cap(en):ar}
+
+/* ---- read the style number from a photo of the box label ---- */
+function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function findStyle(text){
+  const t=String(text).toUpperCase().replace(/[—–_.]/g,'-');
+  let m=t.match(/\b([A-Z]{2}\d)\s*-?\s*(\d{8})(?:\s*-\s*(\d))?/);
+  if(!m){const n=t.replace(/O/g,'0').match(/\b(CK|SL|PM|PW)\s*(\d)\s*-?\s*(\d{8})/);if(n)m=[0,n[1]+n[2],n[3]]}
+  return m?m[1]+'-'+m[2]+(m[3]?'-'+m[3]:''):'';
+}
+async function shrink(file){
+  const bmp=await createImageBitmap(file),k=Math.min(1,1800/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas');c.width=bmp.width*k;c.height=bmp.height*k;c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);return c;
+}
+function scanMsg(en,ar,err){const m=$('scanMsg');m.className='hint'+(err?' err':'');m.innerHTML=esc(en)+' <span lang="ar">'+esc(ar)+'</span>'}
+$('boxPhoto').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  scanMsg('Reading the label…','جاري قراءة الملصق…');
+  try{
+    if(!window.Tesseract)await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+    const out=await Tesseract.recognize(await shrink(f),'eng');
+    const s=findStyle(out.data.text);
+    if(s){$('style').value=s;scanMsg('Style number found. Check it matches the box.','تم العثور على رقم الموديل. تأكد أنه مطابق للعلبة.')}
+    else scanMsg('Could not read the style number. Retake the photo closer to the label, or type it.','تعذرت قراءة رقم الموديل. صوّر الملصق عن قرب أو اكتبه.',true);
+  }catch(err){scanMsg('Photo reading is not available right now. Type the style number.','قراءة الصورة غير متاحة الآن. اكتب رقم الموديل.',true)}
+});
+
+/* ---- save ---- */
+function pendingNote(){
+  const n=jget('mo_pending').length,m=$('formMsg');
+  m.textContent=n?n+' record(s) waiting to send | سجلات بانتظار الإرسال':'';m.classList.toggle('hidden',!n);
+}
+async function flushPending(){
+  if(!SCRIPT_URL)return;const q=jget('mo_pending');if(!q.length)return;const left=[];
+  for(const r of q){try{const x=await api({action:'create',record:r});if(x.status!=='ok')left.push(r)}catch(e){left.push(r)}}
+  lsSet('mo_pending',JSON.stringify(left));pendingNote();
+}
+$('saveBtn').onclick=async()=>{
+  const rec={id:'KSA-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase(),
+    date:$('date').value,brand:sel.brand,store:$('store').value,staff:$('staff').value.trim(),
+    customer:$('customer').value.trim(),phone:$('phone').value.trim(),category:sel.cat,type:sel.type,
+    style:$('style').value.trim().toUpperCase(),colour:colourValue(),size:sel.size||$('sizeText').value.trim(),
+    barcode:$('barcode').value.trim(),price:$('price').value.trim(),reason:sel.reasons[0]||'',reason2:sel.reasons[1]||'',remark:$('remark').value.trim()};
+  rec.region=(STORES.find(s=>s[0]===rec.brand&&s[1]===rec.store)||[])[3]||'';
+  const miss=[];
+  if(!rec.brand)miss.push('Brand العلامة');if(!rec.store)miss.push('Store الفرع');if(!rec.date)miss.push('Date التاريخ');
+  if(!rec.staff)miss.push('Staff الموظف');if(!rec.category)miss.push('Category الفئة');if(!rec.reason)miss.push('Reason السبب');
+  if(miss.length){toast('Choose: '+miss.join(', '),true);return}
+  const btn=$('saveBtn');btn.disabled=true;
+  lsSet('mo_staff',rec.staff);const names=jget('mo_staffs');if(!names.includes(rec.staff)){names.push(rec.staff);lsSet('mo_staffs',JSON.stringify(names.slice(-30)))}
+  let msg='Record saved | تم حفظ السجل';
+  if(!SCRIPT_URL){const l=jget('mo_local');l.push(rec);lsSet('mo_local',JSON.stringify(l))}
+  else{try{const r=await api({action:'create',record:rec});if(r.status!=='ok')throw 0}
+    catch(e){const q=jget('mo_pending');q.push(rec);lsSet('mo_pending',JSON.stringify(q));msg='Saved on this device. It sends when the connection is back. | تم الحفظ على الجهاز وسيُرسل عند عودة الاتصال'}}
+  btn.disabled=false;toast(msg);pendingNote();dashLoaded=false;
+  ['style','price','barcode','customer','phone','remark','sizeText','colourEn','colourAr'].forEach(i=>$(i).value='');
+  sel.type=sel.size='';sel.cat='';sel.reasons=[];drawCats();drawReasons();drawStaffList();
+  scanMsg('Take a photo of the box label. The style number fills in. Check it.','صوّر ملصق العلبة ليُكتب رقم الموديل تلقائياً، ثم تأكد منه.');
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+/* ================= DASHBOARD ================= */
+let records=[],dashLoaded=false;const flt={period:'30 days',brand:'All'};
+const bi = v => [v,AR[v]||''];
+const pct = (a,b) => b?Math.round(a/b*100):0;
+// fn may return one key or a list of keys (a record with 2 reasons counts under both)
+function group(rows,fn){const m=new Map();rows.forEach(r=>[].concat(fn(r)).forEach(k=>{if(!k)return;const g=m.get(k)||{k,n:0,val:0,st:new Set()};g.n++;g.val+=r.priceN;g.st.add(r.brand+' | '+r.store);m.set(k,g)}));return [...m.values()].sort((a,b)=>b.n-a.n||b.val-a.val)}
+function panel(en,ar,items,o){
+  o=o||{};let body='<div class="empty">No records | لا توجد سجلات</div>';
+  if(items.length){const top=items.slice(0,o.limit||8),max=top[0].n;
+    body=top.map(i=>{const l=i.label||bi(i.k);const num=o.mode==='value'?i.n+' <small>'+CUR+' '+fmt(i.val)+'</small>':o.mode==='share'?i.n+' <small>'+pct(i.n,o.of)+'%</small>':o.mode==='stores'?i.n+' <small>'+i.st.size+' store(s)</small>':String(i.n);
+      return '<div class="row"><div class="lab"><span>'+esc(l[0])+'</span><span lang="ar">'+esc(l[1])+'</span></div><div class="barline"><div class="bar"><i style="width:'+Math.max(3,i.n/max*100)+'%"></i></div><div class="num">'+num+'</div></div></div>'}).join('')}
+  return '<div class="sec"><div class="lb"><span>'+en+'</span><span lang="ar">'+ar+'</span></div>'+(o.sub?'<div class="sub">'+o.sub+'</div>':'')+body+'</div>';
+}
+const box = (en,ar,sub,body) => '<div class="sec"><div class="lb"><span>'+en+'</span><span lang="ar">'+ar+'</span></div>'+(sub?'<div class="sub">'+sub+'</div>':'')+(body||'<div class="empty">No records | لا توجد سجلات</div>')+'</div>';
+const h2 = (en,ar) => '<div class="h2"><span>'+en+'</span><span lang="ar">'+ar+'</span></div>';
+function scope(){ // brand, area and store filters, no date
+  const rg=$('fRegion').value,st=$('fStore').value;
+  return records.filter(r=>(flt.brand==='All'||r.brand===flt.brand)&&(!rg||r.region===rg)&&(!st||r.brand+' | '+r.store===st));
+}
+function range(){ // [from, to, previousFrom, previousTo]
+  const days={'Today':1,'7 days':7,'30 days':30}[flt.period],t=new Date(),to=iso(t);
+  if(days){const f=new Date(t);f.setDate(f.getDate()-days+1);const pt=new Date(f);pt.setDate(pt.getDate()-1);const pf=new Date(pt);pf.setDate(pf.getDate()-days+1);return [iso(f),to,iso(pf),iso(pt)]}
+  if(flt.period==='This month')return [to.slice(0,8)+'01',to];
+  return ['',''];
+}
+function filtered(){const g=range();return scope().filter(r=>(!g[0]||r.date>=g[0])&&(!g[1]||r.date<=g[1]))}
+function storeFilterList(){
+  const rg=$('fRegion').value,el=$('fStore'),cur=el.value,vals=STORES.filter(s=>(flt.brand==='All'||s[0]===flt.brand)&&(!rg||s[3]===rg)).map(s=>s[0]+' | '+s[1]);
+  el.innerHTML='<option value="">All stores | كل الفروع</option>'+vals.map(v=>'<option>'+esc(v)+'</option>').join('');el.value=vals.includes(cur)?cur:'';
+}
+function draw(){
+  const rows=filtered(),n=rows.length,g=range(),rg=$('fRegion').value,st=$('fStore').value;
+  const val=rows.reduce((a,r)=>a+r.priceN,0),priced=rows.filter(r=>r.priceN>0).length;
+  const stock=rows.filter(r=>r.reasons.some(x=>STOCK.includes(x))),stockVal=stock.reduce((a,r)=>a+r.priceN,0);
+  const calls=rows.filter(r=>r.phone).sort((a,b)=>b.date.localeCompare(a.date));
+  const inScope=STORES.filter(s=>(flt.brand==='All'||s[0]===flt.brand)&&(!rg||s[3]===rg)&&(!st||s[0]+' | '+s[1]===st));
+  const byStore=group(rows,r=>r.brand+' | '+r.store);byStore.forEach(x=>x.label=[x.k,AR[x.k.split(' | ')[1]]||'']);
+  const quiet=inScope.filter(s=>!byStore.some(b=>b.k===s[0]+' | '+s[1]));
+  let delta='';
+  if(g[2]){const prev=scope().filter(r=>r.date>=g[2]&&r.date<=g[3]).length;
+    delta=prev?(n>=prev?'▲ ':'▼ ')+Math.abs(pct(n-prev,prev))+'% vs previous '+flt.period+' ('+prev+')':'No records in the previous '+flt.period}
+  $('kpis').innerHTML=[
+    [fmt(n),'Missed sales | الفرص الضائعة',delta],
+    [fmt(val),'Value lost '+CUR+' | القيمة المفقودة',priced<n?(n-priced)+' without price | بدون سعر':''],
+    [pct(stock.length,n)+'%','Stock-related | بسبب المخزون',CUR+' '+fmt(stockVal)+' could be saved by refill'],
+    [byStore.length+' / '+inScope.length,'Stores recording | الفروع المسجِّلة',quiet.length?quiet.length+' not recording | لم تسجل':''],
+    [priced?fmt(val/priced):'0','Average price '+CUR+' | متوسط السعر',''],
+    [calls.length,'Customers to call back | عملاء للاتصال','with a phone number | لديهم رقم']
+  ].map(k=>'<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+'</span>'+(k[2]?'<em>'+k[2]+'</em>':'')+'</div>').join('');
+
+  const byReason=group(rows,r=>r.reasons),byCat=group(rows,r=>r.category),byType=group(rows,r=>r.type),byStyle=group(rows,r=>r.style),
+    byColour=group(rows,r=>r.colour),byRegion=group(rows,r=>r.region),byAm=group(rows,r=>r.am),byBrand=group(rows,r=>r.brand),
+    bySize=group(rows.filter(r=>/shoes/i.test(r.category)),r=>r.size),byStaff=group(rows,r=>r.staff+' ('+r.store+')'),
+    byDay=group(rows,r=>DAYS[new Date(r.date+'T12:00:00').getDay()][0]),
+    refill=group(stock.filter(r=>r.style),r=>[r.style,r.colour,r.size].filter(Boolean).join(' · ')),
+    pairs=group(rows.filter(r=>r.reasons.length===2),r=>r.reasons.slice().sort().join(' + '));
+  [byStyle,bySize,byStaff,byAm,refill,pairs].forEach(l=>l.forEach(x=>x.label=[x.k,'']));
+
+  // key points
+  const kp=[];
+  if(n){
+    kp.push(['Main reason: '+byReason[0].k+', in '+pct(byReason[0].n,n)+'% of records.','السبب الرئيسي: '+(AR[byReason[0].k]||byReason[0].k)+' في '+pct(byReason[0].n,n)+'% من السجلات.']);
+    kp.push([pct(stock.length,n)+'% of missed sales are stock-related, worth '+CUR+' '+fmt(stockVal)+'.',pct(stock.length,n)+'% من الفرص الضائعة بسبب المخزون بقيمة '+fmt(stockVal)+' '+CUR+'.']);
+    if(refill.length)kp.push(['First item to refill: '+refill[0].k+', asked '+refill[0].n+' time(s) in '+refill[0].st.size+' store(s).','أول منتج لإعادة التعبئة: '+refill[0].k+'، طُلب '+refill[0].n+' مرة في '+refill[0].st.size+' فرع.']);
+    if(!st)kp.push(['Most missed sales: '+byStore[0].k+' with '+byStore[0].n+'.','أكثر فرع: '+(byStore[0].label[1]||byStore[0].k)+' بعدد '+byStore[0].n+'.']);
+    if(bySize.length)kp.push(['Shoe size asked for most: '+bySize[0].k+' ('+bySize[0].n+').','مقاس الحذاء الأكثر طلباً: '+bySize[0].k+' ('+bySize[0].n+').']);
+    if(quiet.length&&!st)kp.push([quiet.length+' store(s) recorded nothing in this period.',quiet.length+' فرع لم يسجل شيئاً في هذه الفترة.']);
+    if(calls.length)kp.push([calls.length+' customer(s) left a number and can be called back.',calls.length+' عميل ترك رقمه ويمكن الاتصال به.']);
+  }else kp.push(['No records for this selection.','لا توجد سجلات لهذا الاختيار.']);
+  $('keyList').innerHTML=kp.map(k=>'<p>'+esc(k[0])+'<span>'+esc(k[1])+'</span></p>').join('');
+
+  // trend
+  let trend='';
+  if(n){const ds=rows.map(r=>r.date).sort(),a=new Date((g[0]||ds[0])+'T12:00:00'),b=new Date((g[1]||ds[n-1])+'T12:00:00'),span=Math.round((b-a)/864e5)+1,step=span>45?7:1,bk=[];
+    for(let d=new Date(a);d<=b;d.setDate(d.getDate()+step)){const s=iso(d),e=new Date(d);e.setDate(e.getDate()+step-1);const en=iso(e);bk.push([s,rows.filter(r=>r.date>=s&&r.date<=en).length])}
+    const mx=Math.max(...bk.map(x=>x[1]),1);
+    trend='<div class="trend">'+bk.map(x=>'<div class="'+(x[1]?'':'z')+'" style="height:'+(x[1]/mx*100)+'%" title="'+x[0]+': '+x[1]+'"></div>').join('')+'</div><div class="ax"><span>'+bk[0][0]+'</span><span>'+(step>1?'per week | أسبوعياً':'per day | يومياً')+', max '+mx+'</span><span>'+bk[bk.length-1][0]+'</span></div>'}
+  // top reason in each category
+  const catWhy=byCat.map(c=>{const top=group(rows.filter(r=>r.category===c.k),r=>r.reasons)[0];
+    return '<div class="item"><div>'+esc(c.k)+' <span lang="ar">'+esc(AR[c.k]||'')+'</span><small>'+esc(top.k)+' | <span lang="ar">'+esc(AR[top.k]||'')+'</span></small></div><div class="big">'+top.n+' / '+c.n+'</div></div>'}).join('');
+  const refillHtml=refill.slice(0,12).map(x=>'<div class="item"><div><b>'+esc(x.k)+'</b><small>'+esc([...x.st].map(v=>v.split(' | ')[1]).join(', '))+'</small></div><div class="big">×'+x.n+'</div></div>').join('');
+  const callHtml=calls.slice(0,25).map(r=>'<div class="item"><div><b>'+esc(r.customer||'Customer | عميل')+'</b><small>'+esc([r.style||r.category,r.colour,r.size].filter(Boolean).join(' · '))+'</small><small>'+esc(r.date+' · '+r.store)+(r.remark?' · '+esc(r.remark):'')+'</small></div><a href="tel:'+esc(r.phone.replace(/[^\d+]/g,''))+'" dir="ltr">'+esc(r.phone)+'</a></div>').join('');
+  const quietHtml=quiet.length?'<div class="quiet">'+quiet.map(s=>'<span>'+esc((flt.brand==='All'?s[0]+' | ':'')+s[1])+'</span>').join('')+'</div>':'<div class="empty">All stores recorded. | جميع الفروع سجّلت.</div>';
+
+  $('panels').innerHTML=
+    h2('1. What to act on','١. ما يجب العمل عليه')+
+    box('Refill list for merchandising','قائمة إعادة التعبئة','Style, colour and size asked for most where the reason is stock. | الأكثر طلباً بسبب المخزون',refillHtml)+
+    box('Customers to call back','عملاء للاتصال بهم','Tap the number to call. | اضغط على الرقم للاتصال',callHtml)+
+    (st?'':box('Stores not recording','فروع لم تسجل','No records in this period. | لا سجلات في هذه الفترة',quietHtml))+
+    h2('2. Why sales are missed','٢. لماذا تضيع المبيعات')+
+    panel('By reason','حسب السبب',byReason,{mode:'share',of:n,limit:14,sub:'Share of records. A record with 2 reasons counts under both. | السجل بسببين يُحسب في كليهما'})+
+    box('Top reason in each category','السبب الأول في كل فئة','Records with that reason / all records in the category',catWhy)+
+    panel('Reasons chosen together','أسباب اختيرت معاً',pairs,{limit:6})+
+    h2('3. Where','٣. أين')+
+    panel('By area','حسب المنطقة',byRegion,{mode:'value'})+panel('By store','حسب الفرع',byStore,{mode:'value',limit:30})+
+    panel('By area manager','حسب مدير المنطقة',byAm,{mode:'value'})+panel('By brand','حسب العلامة',byBrand,{mode:'value'})+
+    h2('4. What customers wanted','٤. ماذا أراد العملاء')+
+    panel('By category','حسب الفئة',byCat,{mode:'value'})+
+    panel('Most requested styles','الموديلات الأكثر طلباً',byStyle,{mode:'stores',limit:10})+panel('Shoe sizes asked for','مقاسات الأحذية المطلوبة',bySize,{limit:10})+
+    panel('Colours asked for','الألوان المطلوبة',byColour)+
+    h2('5. When and who','٥. متى ومن')+
+    box('Over time','عبر الوقت','',trend)+panel('By day of week','حسب يوم الأسبوع',byDay)+panel('Records by staff','السجلات حسب الموظف',byStaff,{limit:10});
+  drawRecs(rows);
+}
+function drawRecs(rows){
+  const q=$('search').value.trim().toLowerCase();let l=[...rows].sort((a,b)=>b.date.localeCompare(a.date));
+  if(q)l=l.filter(r=>Object.values(r).join(' ').toLowerCase().includes(q));
+  $('recs').innerHTML=l.slice(0,100).map(r=>'<div class="rec"><b>'+esc(r.style||r.category)+'</b> '+esc([r.type,r.colour,r.size].filter(Boolean).join(', '))+(r.priceN?' · '+CUR+' '+fmt(r.priceN):'')+
+    '<small>'+esc(r.date+' · '+r.brand+' · '+r.store+' · '+r.staff)+'</small><small>'+esc(r.reasons.join(' + '))+' | <span lang="ar">'+esc(r.reasons.map(x=>AR[x]||x).join(' + '))+'</span></small>'+
+    (r.customer||r.phone?'<small>'+esc(r.customer+' '+r.phone)+'</small>':'')+(r.remark?'<small>'+esc(r.remark)+'</small>':'')+'</div>').join('')||'<div class="empty gap">No records | لا توجد سجلات</div>';
+  if(l.length>100)$('recs').insertAdjacentHTML('beforeend','<div class="hint">Showing 100 of '+l.length+'. Download the CSV for all.</div>');
+}
+const KEYS=['id','date','brand','store','city','region','am','staff','customer','phone','category','type','style','colour','size','barcode','price','reason','reason2','remark'];
+function csv(){
+  const h=['Record ID','Date','Brand','Store','City','Region','Area Manager','Staff Name','Customer Name','Customer No','Category','Product Type','Style No','Colour','Size','Barcode','Price ('+CUR+')','Reason 1','Reason 2','Remark'];
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+[h.map(q).join(',')].concat(filtered().map(r=>KEYS.map(x=>q(r[x])).join(','))).join('\r\n')],{type:'text/csv;charset=utf-8'}));
+  a.download='KSA_Missed_Opportunity_'+iso(new Date())+'.csv';a.click();
+}
+function normalise(list){
+  return list.map(r=>{const o={};KEYS.forEach(x=>o[x]=String(r[x]==null?'':r[x]).trim());o.priceN=parseFloat(o.price)||0;o.reasons=[o.reason,o.reason2].filter(Boolean);
+    if(!o.region)o.region=(STORES.find(s=>s[0]===o.brand&&s[1]===o.store)||[])[3]||'';return o}).filter(r=>r.date&&r.store);
+}
+async function openDash(){
+  $('gate').classList.add('hidden');$('dash').classList.add('hidden');
+  let pin='';try{pin=sessionStorage.getItem('mo_pin')||''}catch(e){}
+  if(SCRIPT_URL&&!pin){$('gate').classList.remove('hidden');return}
+  try{
+    if(!SCRIPT_URL)records=normalise(jget('mo_local'));
+    else{const r=await api({action:'records',pin});
+      if(r.status==='denied'){try{sessionStorage.removeItem('mo_pin')}catch(e){}$('gate').classList.remove('hidden');toast('Wrong PIN | الرمز غير صحيح',true);return}
+      if(r.status!=='ok')throw 0;records=normalise(r.records||[])}
+    dashLoaded=true;$('dash').classList.remove('hidden');
+    $('fRegion').innerHTML='<option value="">All areas | كل المناطق</option>'+REGIONS.map(r=>'<option value="'+r[0]+'">'+r[0]+' | '+r[1]+'</option>').join('');
+    storeFilterList();draw();
+  }catch(e){toast('Could not load records. Check the connection. | تعذر تحميل السجلات',true);if(SCRIPT_URL)$('gate').classList.remove('hidden')}
+}
+function fchips(id,items,key){
+  const el=$(id);el.innerHTML=items.map(x=>'<button type="button" class="chip" data-v="'+esc(x[0])+'" aria-pressed="'+(flt[key]===x[0])+'">'+esc(x[0])+' '+esc(x[1])+'</button>').join('');
+  el.onclick=e=>{const b=e.target.closest('.chip');if(!b)return;flt[key]=b.dataset.v;el.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===flt[key]));storeFilterList();draw()};
+}
+fchips('fPeriod',[['Today','اليوم'],['7 days','٧ أيام'],['30 days','٣٠ يوماً'],['This month','هذا الشهر'],['All','الكل']],'period');
+fchips('fBrand',[['All','كل العلامات']].concat(BRANDS),'brand');
+$('fRegion').onchange=()=>{storeFilterList();draw()};$('fStore').onchange=draw;$('search').oninput=()=>drawRecs(filtered());$('csvBtn').onclick=csv;$('refreshBtn').onclick=openDash;
+$('pinBtn').onclick=()=>{const p=$('pin').value.trim();if(!p)return;try{sessionStorage.setItem('mo_pin',p)}catch(e){}$('pin').value='';openDash()};
+$('pin').onkeydown=e=>{if(e.key==='Enter')$('pinBtn').click()};
+
+/* ================= START ================= */
+function tab(d){$('tabRec').setAttribute('aria-selected',!d);$('tabDash').setAttribute('aria-selected',d);
+  $('viewRec').classList.toggle('hidden',d);$('viewDash').classList.toggle('hidden',!d);$('savebar').classList.toggle('hidden',d);
+  if(d&&!dashLoaded)openDash();window.scrollTo(0,0)}
+$('tabRec').onclick=()=>tab(false);$('tabDash').onclick=()=>tab(true);
+window.addEventListener('online',flushPending);
+(async function(){
+  $('notConnected').classList.toggle('hidden',!!SCRIPT_URL);initForm();pendingNote();
+  if(SCRIPT_URL){
+    try{const r=await api({action:'stores'});if(r.status==='ok'&&r.stores&&r.stores.length){STORES=r.stores.map(s=>[s.brand,s.en,s.ar,s.region]);mapStores();drawArea();drawStores()}}catch(e){}
+    flushPending();
+  }
+})();
+</script>
+</body>
+</html>
