@@ -168,8 +168,10 @@ select,input[type=text],input[type=tel],input[type=number],input[type=date],text
     <div class="lb"><span>Dashboard PIN</span><span lang="ar">الرمز السري</span></div>
     <input type="password" id="pin" inputmode="numeric" autocomplete="off" aria-label="PIN">
     <button class="btn" id="pinBtn" type="button">Open dashboard | فتح اللوحة</button>
+    <div class="hint err" id="loadErr"></div>
   </div>
   <div id="dash" class="hidden">
+    <div class="hint" id="loadInfo" style="margin:0 2px 8px"></div>
     <div class="sec">
       <div class="chips" id="fPeriod"></div>
       <div class="chips gap" id="fBrand"></div>
@@ -277,12 +279,12 @@ function chips(id,items,key,onChange,opts){
 
 /* ================= FORM ================= */
 function drawArea(){
-  const have=REGIONS.filter(r=>STORES.some(s=>s[0]===sel.brand&&s[3]===r[0])),keep=lsGet('mo_area_'+sel.brand,'');
+  const have=REGIONS.filter(r=>STORES.some(s=>s[0]===sel.brand&&s[3]===r[0])),keep='';
   $('area').innerHTML='<option value="">All areas | كل المناطق</option>'+have.map(r=>'<option value="'+r[0]+'">'+r[0]+' | '+r[1]+'</option>').join('');
   $('area').value=have.some(r=>r[0]===keep)?keep:'';
 }
 function drawStores(){
-  const ar=$('area').value,list=STORES.filter(s=>s[0]===sel.brand&&(!ar||s[3]===ar)),keep=lsGet('mo_store_'+sel.brand,'');
+  const ar=$('area').value,list=STORES.filter(s=>s[0]===sel.brand&&(!ar||s[3]===ar)),keep='';
   $('store').innerHTML='<option value="">Choose store | اختر الفرع</option>'+list.map(s=>'<option value="'+esc(s[1])+'">'+esc(s[1])+' | '+esc(s[2])+'</option>').join('');
   $('store').value=list.some(s=>s[1]===keep)?keep:'';
 }
@@ -310,14 +312,14 @@ function setBrand(){lsSet('mo_brand',sel.brand);drawArea();drawStores();drawCats
 function drawStaffList(){$('staffList').innerHTML=jget('mo_staffs').map(s=>'<option value="'+esc(s)+'">').join('')}
 
 function initForm(){
-  sel.brand=lsGet('mo_brand','');
+  sel.brand='';
   chips('gBrand',BRANDS,'brand',setBrand,{keep:true});
   drawArea();drawStores();drawCats();
   initColour();drawReasons();
   $('area').onchange=()=>{lsSet('mo_area_'+sel.brand,$('area').value);drawStores()};
   $('gRemark').innerHTML=REMARKS.map(r=>'<button type="button" class="chip" data-v="'+esc(r[0])+'">'+esc(r[0])+' '+esc(r[1])+'</button>').join('');
   $('gRemark').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const t=$('remark');if(!t.value.includes(b.dataset.v))t.value=(t.value?t.value+'. ':'')+b.dataset.v};
-  $('date').value=iso(new Date());$('staff').value=lsGet('mo_staff','');drawStaffList();
+  $('date').value=iso(new Date());$('staff').value='';drawStaffList();
   $('store').onchange=()=>lsSet('mo_store_'+sel.brand,$('store').value);
 }
 
@@ -402,7 +404,8 @@ $('saveBtn').onclick=async()=>{
     catch(e){const q=jget('mo_pending');q.push(rec);lsSet('mo_pending',JSON.stringify(q));msg='Saved on this device. It sends when the connection is back. | تم الحفظ على الجهاز وسيُرسل عند عودة الاتصال'}}
   btn.disabled=false;toast(msg);pendingNote();dashLoaded=false;
   ['style','price','barcode','customer','phone','remark','sizeText','colourEn','colourAr'].forEach(i=>$(i).value='');
-  sel.type=sel.size='';sel.cat='';sel.reasons=[];drawCats();drawReasons();drawStaffList();
+  sel.type=sel.size='';sel.cat='';sel.reasons=[];sel.brand='';chips('gBrand',BRANDS,'brand',setBrand,{keep:true});drawArea();drawStores();
+  $('staff').value='';$('date').value=iso(new Date());drawCats();drawReasons();drawStaffList();
   scanMsg('Take a photo of the box label. The style number fills in. Check it.','صوّر ملصق العلبة ليُكتب رقم الموديل تلقائياً، ثم تأكد منه.');
   window.scrollTo({top:0,behavior:'smooth'});
 };
@@ -538,11 +541,12 @@ async function openDash(){
     if(!SCRIPT_URL)records=normalise(jget('mo_local'));
     else{const r=await api({action:'records',pin});
       if(r.status==='denied'){try{sessionStorage.removeItem('mo_pin')}catch(e){}$('gate').classList.remove('hidden');toast('Wrong PIN | الرمز غير صحيح',true);return}
-      if(r.status!=='ok')throw 0;records=normalise(r.records||[])}
-    dashLoaded=true;$('dash').classList.remove('hidden');
+      if(r.status!=='ok')throw new Error(r.message||'The sheet script returned an error');records=normalise(r.records||[])}
+    dashLoaded=true;$('dash').classList.remove('hidden');$('loadErr').textContent='';
+    $('loadInfo').textContent=(SCRIPT_URL?records.length+' record(s) loaded from Google Sheet':'Test mode: '+records.length+' record(s) on this device only')+' · '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     $('fRegion').innerHTML='<option value="">All areas | كل المناطق</option>'+REGIONS.map(r=>'<option value="'+r[0]+'">'+r[0]+' | '+r[1]+'</option>').join('');
     storeFilterList();draw();
-  }catch(e){toast('Could not load records. Check the connection. | تعذر تحميل السجلات',true);if(SCRIPT_URL)$('gate').classList.remove('hidden')}
+  }catch(e){toast('Could not load records. Check the connection. | تعذر تحميل السجلات',true);$('loadErr').textContent='Error: '+(e&&e.message?e.message:e);if(SCRIPT_URL)$('gate').classList.remove('hidden')}
 }
 function fchips(id,items,key){
   const el=$(id);el.innerHTML=items.map(x=>'<button type="button" class="chip" data-v="'+esc(x[0])+'" aria-pressed="'+(flt[key]===x[0])+'">'+esc(x[0])+' '+esc(x[1])+'</button>').join('');
